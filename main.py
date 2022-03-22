@@ -1,36 +1,39 @@
 from mnemonic import Mnemonic
 import bip32utils
-from encrypt import encrypt,decrypt
 import os
+import secure
 import pandas
 from getlucky import getlucky
 from bit import Key
+import random
 mnemon = Mnemonic('english')
-print("Make sure you type quit in the app or your files cant be accesed anymore!!!")
 def wallet(mnemonic):
-  seed=mnemon.to_seed(mnemonic)
+  d=open("walletdata.txt")
+  mn=d.read()
+  d.close()
+  seed=mnemon.to_seed(mn)
   root_key = bip32utils.BIP32Key.fromEntropy(seed)
   child_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(0)
   child_address = child_key.Address()
   child_public_hex = child_key.PublicKey().hex()
   child_private_wif = child_key.WalletImportFormat()
   sendkey=Key(child_private_wif)
-  print(child_address)
   while True:
-    print("1=View Balance | 2=Send BTC | 3=Danger Zone | 4=View Transactions | 5=Security | 6=Tools")
+    print("1=View Balance | 2=Send BTC | 7=Receive BTC | 3=Danger Zone | 4=View Transactions | 5=Security | 6=Tools | 8=View All Addresses")
     choice=input("Option: ")
-    encrypt("walletdata.txt")
     if choice=="5":
       print(f"Private Key WIF: {child_private_wif}")
       print(f"Public Key HEX: {child_public_hex}")
-      print(f"Mnemonic: {mnemonic}")
+      print(f"Mnemonic: {mn}")
+    elif choice=="q":
+      secure.encrypt("walletdata.txt")
+      exit()
     elif choice=="1":
       print("BTC Balance: "+sendkey.get_balance())
     elif choice=="6":
       print("1=Get Lucky")
       tool=input("Option: ")
       if tool=="1":
-        encrypt("walletdata.txt")
         getlucky()
     elif choice=="2":
       print("Enter q to cancel")
@@ -49,11 +52,32 @@ def wallet(mnemonic):
       transactions = df['txs']
       for i in range(len(transactions)):
         print(transactions[i]['hash'])
+    elif choice=="7":
+      rec_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(random.randint(1,50))
+      rec_address = rec_key.Address()
+      print("Receiving Address: "+rec_address)
+    elif choice=="3":
+      print("You are in the danger zone. Actions here can be permanent.")
+      dangerchoice=input("1=Remove Wallet")
+      if dangerchoice=="1":
+        print("Removing wallet...")
+        os.unlink("walletdata.txt")
+        os.unlink("secrets/wallet.key")
+        os.rmdir("secrets")
+        print("Wallet Removed")
+        print("You can restore it with this word phrase\n "+mn)
+        exit()
+    elif choice=="8":
+      for i in range(51):
+        rec_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(i)
+        rec_address = rec_key.Address()
+        print(f"Wallet {i}: {rec_address}")
     wallet(mnemonic)
 def main():
+  os.system("clear")
   if os.path.exists("walletdata.txt"):
-    df=decrypt("walletdata.txt")
-    wallet(df,)
+    df=secure.decrypt("walletdata.txt")
+    wallet(df)
   else:
     options=input("1=Create Wallet | 2=Import Wallet: ")
     if options=="1":
@@ -61,27 +85,35 @@ def main():
       seed = mnemon.to_seed(words)
       root_key = bip32utils.BIP32Key.fromEntropy(seed)
       child_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(0) 
-      child_private_wif = child_key.WalletImportFormat()
-      child_address = child_key.Address()
-      print(f"Mnemonic: {words}")
-      print(f'Address: {child_address}')
-      print(f'Private: {child_private_wif}\n')
       f=open('walletdata.txt',"a")
       f.write(words)
       f.close()
+      secure.encrypt("walletdata.txt")
+      secure.decrypt("walletdata.txt")
+      print("Write down these words. If you lose them you wont be able to recover your wallet!")
+      print()
+      print(words)
+      print()
       wallet(words)
     elif options=="2":
       words=input("Mnemonic Seed: ")
-      seed = mnemon.too_seed(words)
+      seed = mnemon.to_seed(words)
       root_key = bip32utils.BIP32Key.fromEntropy(seed)
       child_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(0) 
-      child_private_wif = child_key.WalletImportFormat()
-      child_address = child_key.Address()
-      print(f"Mnemonic: {words}")
-      print(f'Address: {child_address}')
-      print(f'Private: {child_private_wif}\n')
       f=open('walletdata.txt',"a")
       f.write(words)
       f.close()
+      secure.encrypt("walletdata.txt")
+      secure.decrypt("walletdata.txt")
       wallet(words)
-main()
+class MainWindow(object):
+  def start():
+    try:
+        main()
+    except KeyboardInterrupt:
+        MainWindow.stop()
+  def stop():
+    print("Securing Wallet...")
+    secure.encrypt("walletdata.txt")
+    print("Secured")
+MainWindow.start()

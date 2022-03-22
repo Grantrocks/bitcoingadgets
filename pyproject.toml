@@ -16,6 +16,7 @@ requests = "^2.27.1"
 bit = "^0.8.0"
 bs4 = "^0.0.1"
 colorama = "^0.4.4"
+pyminizip = "^0.2.6"
 
 [tool.poetry.dev-dependencies]
 
