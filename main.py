@@ -6,6 +6,7 @@ import pandas
 from getlucky import getlucky
 from bit import Key
 import random
+from makeqr import gqr
 mnemon = Mnemonic('english')
 def wallet(mnemonic):
   seed=mnemon.to_seed(mnemonic)
@@ -53,6 +54,7 @@ def wallet(mnemonic):
       rec_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(random.randint(1,50))
       rec_address = rec_key.Address()
       print("Receiving Address: "+rec_address)
+      gqr(rec_address)
     elif choice=="3":
       print("You are in the danger zone. Actions here can be permanent.")
       dangerchoice=input("1=Remove Wallet")
