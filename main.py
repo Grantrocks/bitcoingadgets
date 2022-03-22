@@ -77,6 +77,7 @@ def main():
   os.system("clear")
   if os.path.exists("walletdata.txt"):
     df=secure.decrypt("walletdata.txt")
+    print(df)
     wallet(df)
   else:
     options=input("1=Create Wallet | 2=Import Wallet: ")
@@ -89,7 +90,6 @@ def main():
       f.write(words)
       f.close()
       secure.encrypt("walletdata.txt")
-      secure.decrypt("walletdata.txt")
       print("Write down these words. If you lose them you wont be able to recover your wallet!")
       print()
       print(words)
@@ -104,7 +104,6 @@ def main():
       f.write(words)
       f.close()
       secure.encrypt("walletdata.txt")
-      secure.decrypt("walletdata.txt")
       wallet(words)
 class MainWindow(object):
   def start():
@@ -114,6 +113,5 @@ class MainWindow(object):
         MainWindow.stop()
   def stop():
     print("Securing Wallet...")
-    secure.encrypt("walletdata.txt")
     print("Secured")
 MainWindow.start()

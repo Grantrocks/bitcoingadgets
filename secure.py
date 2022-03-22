@@ -22,7 +22,4 @@ def decrypt(file):
   with open("walletdata.txt", 'rb') as f:
     file = f.read()
   decrypt_file = fernet.decrypt(file)
-  with open("walletdata.txt", 'wb') as decrypted_file:
-    decrypted_file.write(decrypt_file)
-  df=open("walletdata.txt")
-  return df.read()
+  return decrypt_file
