@@ -15,5 +15,3 @@ That will download all of the needed files for your wallet
 ## Usage
 
 To use the wallet run main.py with python and the wallet will open up. You can do stuff in it by following the prompts.
-
-## Do not close the wallet without using CTRL+C or q. This will make it so that your wallet is forever encrypted and you cant get in to it. Just in case this happens write down your seed. I will remove this soon.
