@@ -24,7 +24,7 @@ def wallet(mnemonic):
       total = 0
       request=[]
       for i in range(0,50):
-        rec_key = bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
+        bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
         rec_address = bip44_addr_ctx.PublicKey().ToAddress()
         request +=[rec_address]
       addresses="|".join(request)
@@ -62,7 +62,8 @@ def wallet(mnemonic):
         print(transactions[i]['hash'])
     elif choice=="7":
       bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(0)
-      rec_address = bip44_addr_ctx = bip44_chg_ctx.AddressIndex(random.randint(0,51))
+      rk= bip44_chg_ctx.AddressIndex(random.randint(0,51))
+      rec_address = rk.PublicKey().ToAddress()
       print("Receiving Address: "+rec_address)
       gqr(rec_address)
     elif choice=="3":
