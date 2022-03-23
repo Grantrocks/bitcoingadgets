@@ -14,7 +14,7 @@ def wallet(mnemonic):
   bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(0)
   bip44_chg_ctx = bip44_acc_ctx.Change(Bip44Changes.CHAIN_EXT)
   while True:
-    print("1=View Balance | 2=Send BTC | 7=Receive BTC | 3=Danger Zone | 4=View Transactions | 5=Security | 6=Tools | 8=View All Addresses")
+    print("1=View Balance | 2=Send BTC | 7=Receive BTC | 3=Danger Zone | 4=View Transactions | 5=Security | 6=Tools | 8=View All Addresses | c=credits")
     choice=input("Option: ")
     if choice=="5":
       print(f"Mnemonic: {mnemonic}")
@@ -23,7 +23,7 @@ def wallet(mnemonic):
     elif choice=="1":
       total = 0
       request=[]
-      for i in range(0,50):
+      for i in range(0,44):
         bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
         rec_address = bip44_addr_ctx.PublicKey().ToAddress()
         request +=[rec_address]
@@ -42,17 +42,28 @@ def wallet(mnemonic):
       if tool=="1":
         getlucky()
     elif choice=="2":
+      for i in range(44):
+        bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
+        rec_wif=bip44_addr_ctx.PrivateKey().ToWif()
+        rec_address=bip44_addr_ctx.PublicKey().ToAddress()
+        print(f"Wallet {i}: {rec_address} WIF: {rec_wif}")
+      wiff=input("Address WIF to send from: ")
+      sendkey=Key(wiff)
       print("Enter q to cancel")
-      sendkey=Key(input("Address WIF to Send From: "))
+      print("Avaiable to send: USD"+str(sendkey.get_balance('usd')))
+      qty=float(input("Amount To Send USD: "))
+      feet=int(input("Fee Rate (reccommended 10. Higher means faster transaction but it costs more): "))
       recip=input("Address To Send To: ")
-      qty=float(input("Amount To Send: "))
-      if float(sendkey.get_balance())<=qty:
+      if float(sendkey.get_balance('usd'))<=qty:
         print("You tried to send more than you have!")
       elif recip=="q" or qty=="q":
         print("Cancelled")
       else:
-        tx_hash = sendkey.send([(recip, qty, 'btc')])
-        print("Your transactions hash: "+str(tx_hash))
+        try:
+          tx_hash = sendkey.send([(recip, qty, 'usd')],fee=feet)
+          print("Your transactions hash: "+str(tx_hash))
+        except:
+          print("Something went wrong with the transaction. Please note that you can only send transactions if your balance is above 0.00001 BTC. This is to prevent problems on the blockchain and I cannot control that.")
     elif choice=="4":
       addr=input("Which Address To Check: ")
       transactions_url = 'https://blockchain.info/rawaddr/'+addr
@@ -62,7 +73,7 @@ def wallet(mnemonic):
         print(transactions[i]['hash'])
     elif choice=="7":
       bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(0)
-      rk= bip44_chg_ctx.AddressIndex(random.randint(0,51))
+      rk= bip44_chg_ctx.AddressIndex(random.randint(0,10))
       rec_address = rk.PublicKey().ToAddress()
       print("Receiving Address: "+rec_address)
       gqr(rec_address)
@@ -78,11 +89,30 @@ def wallet(mnemonic):
         print("You can restore it with this word phrase\n "+mnemonic)
         exit()
     elif choice=="8":
-      for i in range(51):
+      for i in range(44):
         bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
         rec_wif=bip44_addr_ctx.PrivateKey().ToWif()
         rec_address=bip44_addr_ctx.PublicKey().ToAddress()
-        print(f"Wallet {i}: {rec_address} WIF: {rec_wif}")
+        print(f"Wallet {i+1}: {rec_address} WIF: {rec_wif}")
+    elif choice=="c":
+      print("Bitcoin Gadgets is a bitcoin HD Wallet created by Grant McNamara or Grantrocks to help you securely store your cryptocurrency. It contains some helpful toos such as a lucky generator and more.")
+      don=input("Donate to the creator? (y/n): ")
+      if don=="y":
+        print("Thank you for choosing to donate press q to cancel.")
+        don_qty=input("Amount in USD:  ")
+        fr_wif=input("Wallet WIF to send from: ")
+        don_key=Key(fr_wif)
+        if float(don_key.get_balance('usd'))>float(don_qty):
+          confirm=input(f"Send ${don_qty} to the creator? (y/n): ")
+          if confirm=="y":
+            donate_tx=don_key.send([('bc1q7d0ycqy5wfvnq3dhe4s77qa4g37a3zpngsan5a',float(don_qty),'usd')],fee=1)
+            print("Sent the donation. TX ID: ")
+            print(donate_tx)
+            print("Thank you for donating!")
+          else:
+            print("Cancelled")
+        else:
+          print("Not enough btc to send donation with the fee.")
     wallet(mnemonic)
 def main():
   os.system("clear")
