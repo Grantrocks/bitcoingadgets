@@ -61,8 +61,8 @@ def wallet(mnemonic):
       for i in range(len(transactions)):
         print(transactions[i]['hash'])
     elif choice=="7":
-      bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(random.randint(0,50))
-      rec_address = rec_key.Address()
+      bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(0)
+      rec_address = bip44_addr_ctx = bip44_chg_ctx.AddressIndex(random.randint(0,51))
       print("Receiving Address: "+rec_address)
       gqr(rec_address)
     elif choice=="3":

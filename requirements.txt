@@ -1,6 +1,5 @@
 mnemonic
 bip32utils
-cryptography
 pandas
 colorama
 bs4
