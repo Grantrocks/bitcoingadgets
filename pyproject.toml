@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "repl_python3_beta_bitcoingadgets-1"
+version = "0.1.0"
+description = ""
+authors = ["Grantrocks <<>>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+qrcode = "^7.3.1"
+bip32utils = "^0.3.post4"
+bit = "^0.8.0"
+bs4 = "^0.0.1"
+colorama = "^0.4.4"
+mnemonic = "^0.20"
+pandas = "^1.4.1"
+bip-utils = "^2.3.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,33 +1,41 @@
-from mnemonic import Mnemonic
-import bip32utils
 import os
-import secure
 import pandas
 from getlucky import getlucky
 from bit import Key
+import requests
+from bip_utils import (
+    Bip39EntropyBitLen, Bip39EntropyGenerator, Bip39WordsNum, Bip39Languages, Bip39MnemonicGenerator, Bip39MnemonicEncoder, Bip39SeedGenerator, Bip44Coins, Bip44, Bip44Changes, Bip44Levels
+)
 import random
 from makeqr import gqr
-mnemon = Mnemonic('english')
 def wallet(mnemonic):
-  seed=mnemon.to_seed(mnemonic)
-  root_key = bip32utils.BIP32Key.fromEntropy(seed)
-  child_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(0)
-  child_address = child_key.Address()
-  child_public_hex = child_key.PublicKey().hex()
-  child_private_wif = child_key.WalletImportFormat()
-  sendkey=Key(child_private_wif)
+  seed_bytes = Bip39SeedGenerator(str(mnemonic)).Generate()
+  bip44_mst_ctx = Bip44.FromSeed(seed_bytes, Bip44Coins.BITCOIN)
+  bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(0)
+  bip44_chg_ctx = bip44_acc_ctx.Change(Bip44Changes.CHAIN_EXT)
   while True:
     print("1=View Balance | 2=Send BTC | 7=Receive BTC | 3=Danger Zone | 4=View Transactions | 5=Security | 6=Tools | 8=View All Addresses")
     choice=input("Option: ")
     if choice=="5":
-      print(f"Private Key WIF: {child_private_wif}")
-      print(f"Public Key HEX: {child_public_hex}")
       print(f"Mnemonic: {mnemonic}")
     elif choice=="q":
-      secure.encrypt("walletdata.txt")
       exit()
     elif choice=="1":
-      print("BTC Balance: "+sendkey.get_balance())
+      total = 0
+      request=[]
+      for i in range(0,50):
+        rec_key = bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
+        rec_address = bip44_addr_ctx.PublicKey().ToAddress()
+        request +=[rec_address]
+      addresses="|".join(request)
+      url = "https://blockchain.info/balance?active="+addresses
+      response = requests.get(url)
+      balance = response.json()
+      for i in request:
+        addr=balance[i]
+        final=addr["final_balance"]
+        total+=final
+      print("BTC Balance: "+str(total))
     elif choice=="6":
       print("1=Get Lucky")
       tool=input("Option: ")
@@ -35,6 +43,7 @@ def wallet(mnemonic):
         getlucky()
     elif choice=="2":
       print("Enter q to cancel")
+      sendkey=Key(input("Address WIF to Send From: "))
       recip=input("Address To Send To: ")
       qty=float(input("Amount To Send: "))
       if float(sendkey.get_balance())<=qty:
@@ -45,13 +54,14 @@ def wallet(mnemonic):
         tx_hash = sendkey.send([(recip, qty, 'btc')])
         print("Your transactions hash: "+str(tx_hash))
     elif choice=="4":
-      transactions_url = 'https://blockchain.info/rawaddr/'+child_address
+      addr=input("Which Address To Check: ")
+      transactions_url = 'https://blockchain.info/rawaddr/'+addr
       df = pandas.read_json(transactions_url)
       transactions = df['txs']
       for i in range(len(transactions)):
         print(transactions[i]['hash'])
     elif choice=="7":
-      rec_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(random.randint(1,50))
+      bip44_acc_ctx = bip44_mst_ctx.Purpose().Coin().Account(random.randint(0,50))
       rec_address = rec_key.Address()
       print("Receiving Address: "+rec_address)
       gqr(rec_address)
@@ -68,44 +78,35 @@ def wallet(mnemonic):
         exit()
     elif choice=="8":
       for i in range(51):
-        rec_key = root_key.ChildKey(44 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0 + bip32utils.BIP32_HARDEN).ChildKey(0).ChildKey(i)
-        rec_address = rec_key.Address()
-        print(f"Wallet {i}: {rec_address}")
+        bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
+        rec_wif=bip44_addr_ctx.PrivateKey().ToWif()
+        rec_address=bip44_addr_ctx.PublicKey().ToAddress()
+        print(f"Wallet {i}: {rec_address} WIF: {rec_wif}")
     wallet(mnemonic)
 def main():
   os.system("clear")
-  if os.path.exists("secrets/wallet.key"):
-    df=secure.decrypt("walletdata.txt")
-    secure.encrypt("walletdata.txt")
-    wallet(df)
+  if os.path.exists("walletdata.txt"):
+    f=open("walletdata.txt")
+    mnemo=f.read()
+    f.close()
+    wallet(mnemo)
   else:
-    os.mkdir("secrets")
     options=input("1=Create Wallet | 2=Import Wallet: ")
     if options=="1":
-      words = mnemon.generate(256)
+      words= Bip39MnemonicGenerator().FromWordsNumber(Bip39WordsNum.WORDS_NUM_24)
       f=open('walletdata.txt',"a")
-      f.write(words)
+      f.write(f"{words}")
       f.close()
+      wallet(words)
       print("Write down these words. If you lose them you wont be able to recover your wallet!")
       print()
       print(words)
       print()
-      secure.encrypt("walletdata.txt")
       wallet(words)
     elif options=="2":
       words=input("Mnemonic Seed: ")
       f=open('walletdata.txt',"a")
-      f.write(words)
+      f.write(f"{words}")
       f.close()
-      secure.encrypt("walletdata.txt")
       wallet(words)
-class MainWindow(object):
-  def start():
-    try:
-        main()
-    except KeyboardInterrupt:
-        MainWindow.stop()
-  def stop():
-    print("Securing Wallet...")
-    print("Secured")
-MainWindow.start()
+main()
