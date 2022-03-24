@@ -1,4 +1,5 @@
 import os
+os.system("clear")
 if os.path.exists("data"):
   pass
 else:
@@ -142,7 +143,6 @@ def wallet(data):
           print("Not enough btc to send donation with the fee.")
     wallet(mnemonic)
 def main():
-  os.system("clear")
   walletname=input("Wallet name: ")
   if os.path.exists(f"data/{walletname}.txt"):
     f=open(f"data/{walletname}.txt")
