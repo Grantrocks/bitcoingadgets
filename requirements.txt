@@ -1,6 +1,7 @@
 requests
 bit
 qrcode
-bip-utils
-bitcoinlib
-forex-python
+bip_utils
+pandas
+forex_python
+cryptography
