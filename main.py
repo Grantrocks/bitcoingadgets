@@ -1,13 +1,18 @@
 import os
-import pandas
 from getlucky import getlucky
 from bit import Key
 import requests
+import satoshi
+import pandas
 from bip_utils import (
     Bip39EntropyBitLen, Bip39EntropyGenerator, Bip39WordsNum, Bip39Languages, Bip39MnemonicGenerator, Bip39MnemonicEncoder, Bip39SeedGenerator, Bip44Coins, Bip44, Bip44Changes, Bip44Levels
 )
 import random
+from cryptos import *
+c = Bitcoin(testnet=False)
 from makeqr import gqr
+def btc2satoshi(btc: float) -> int:
+  return int(btc * 10**8)
 def wallet(mnemonic):
   seed_bytes = Bip39SeedGenerator(str(mnemonic)).Generate()
   bip44_mst_ctx = Bip44.FromSeed(seed_bytes, Bip44Coins.BITCOIN)
@@ -47,23 +52,24 @@ def wallet(mnemonic):
         rec_wif=bip44_addr_ctx.PrivateKey().ToWif()
         rec_address=bip44_addr_ctx.PublicKey().ToAddress()
         print(f"Wallet {i}: {rec_address} WIF: {rec_wif}")
-      wiff=input("Address WIF to send from: ")
-      sendkey=Key(wiff)
-      print("Enter q to cancel")
-      print("Avaiable to send: USD"+str(sendkey.get_balance('usd')))
-      qty=float(input("Amount To Send USD: "))
-      feet=int(input("Fee Rate (reccommended 10. Higher means faster transaction but it costs more): "))
-      recip=input("Address To Send To: ")
-      if float(sendkey.get_balance('usd'))<=qty:
-        print("You tried to send more than you have!")
-      elif recip=="q" or qty=="q":
-        print("Cancelled")
+      send_from=input("Address WIF to send from: ")
+      pub = c.privtopub(send_from)
+      priv=send_from
+      addr=pubtoaddr(pub)
+      inputs = c.unspent(addr)
+      send_to=input("Address To Send To: ")
+      send_from_key=Key(send_from)
+      send_from_balance=float(send_from_key.get_balance('usd'))
+      print(f"Balance in USD: ${send_from_balance}")
+      send_qty=float(input("Amount to send in USD: $"))
+      if send_from_balance>send_qty:
+        send_qty=btc2satoshi(send_qty)
+        outputs=[{'value': send_qty, 'address':send_to}]
+        print(outputs)
+        tx = c.mktx(inputs,outputs)
+        print(tx)
       else:
-        try:
-          tx_hash = sendkey.send([(recip, qty, 'usd')],fee=feet)
-          print("Your transactions hash: "+str(tx_hash))
-        except:
-          print("Something went wrong with the transaction. Please note that you can only send transactions if your balance is above 0.00001 BTC. This is to prevent problems on the blockchain and I cannot control that.")
+        print("You cant send more than you have!")
     elif choice=="4":
       addr=input("Which Address To Check: ")
       transactions_url = 'https://blockchain.info/rawaddr/'+addr
