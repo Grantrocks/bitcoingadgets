@@ -1,8 +1,6 @@
-mnemonic
-bip32utils
-pandas
-colorama
-bs4
 requests
 bit
 qrcode
+bip-utils
+bitcoinlib
+forex-python
