@@ -38,7 +38,7 @@ def wallet(data):
     elif choice=="1":
       total = 0
       request=[]
-      for i in range(0,44):
+      for i in range(0,11):
         bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
         rec_address = bip44_addr_ctx.PublicKey().ToAddress()
         request +=[rec_address]
@@ -116,7 +116,7 @@ def wallet(data):
         print("You can restore it with this word phrase\n "+mnemonic)
         exit()
     elif choice=="8":
-      for i in range(44):
+      for i in range(11):
         bip44_addr_ctx = bip44_chg_ctx.AddressIndex(i)
         rec_wif=bip44_addr_ctx.PrivateKey().ToWif()
         rec_address=bip44_addr_ctx.PublicKey().ToAddress()

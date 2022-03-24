@@ -3,5 +3,3 @@ bit
 qrcode
 bip_utils
 pandas
-forex_python
-cryptography
