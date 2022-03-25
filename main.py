@@ -4,14 +4,6 @@ if os.path.exists("data"):
   pass
 else:
   os.mkdir("data")
-import pandas
-from fastgen import fastgen
-from bit.network import currency_to_satoshi_cached
-from bit import Key
-import requests
-from bip_utils import Bip39EntropyBitLen, Bip39EntropyGenerator, Bip39WordsNum, Bip39Languages, Bip39MnemonicGenerator, Bip39MnemonicEncoder, Bip39SeedGenerator, Bip44Coins, Bip44, Bip44Changes, Bip44Levels
-import random
-from makeqr import gqr
 message='''
 ██████╗ ██╗████████╗ ██████╗ ██████╗ ██╗███╗   ██╗     ██████╗  █████╗ ██████╗  ██████╗ ███████╗████████╗███████╗
 ██╔══██╗██║╚══██╔══╝██╔════╝██╔═══██╗██║████╗  ██║    ██╔════╝ ██╔══██╗██╔══██╗██╔════╝ ██╔════╝╚══██╔══╝██╔════╝
@@ -23,6 +15,14 @@ message='''
                             Please report errors and bugs at our github repo.  
 '''
 print(message)
+import pandas
+from fastgen import fastgen
+from bit.network import currency_to_satoshi_cached
+from bit import Key
+import requests
+from bip_utils import Bip39EntropyBitLen, Bip39EntropyGenerator, Bip39WordsNum, Bip39Languages, Bip39MnemonicGenerator, Bip39MnemonicEncoder, Bip39SeedGenerator, Bip44Coins, Bip44, Bip44Changes, Bip44Levels
+import random
+from makeqr import gqr
 def wallet(data):
   mnemonic=data
   seed_bytes = Bip39SeedGenerator(str(mnemonic)).Generate()
@@ -110,7 +110,7 @@ def wallet(data):
       dangerchoice=input("1=Remove Wallet")
       if dangerchoice=="1":
         print("Removing wallet...")
-        os.rmdir("data")
+        os.system("rm -rf data")
         print("Wallet Removed")
         print("You can restore it with this word phrase\n "+mnemonic)
         exit()
