@@ -2,6 +2,7 @@
 
 This is a very secure and simple bitcoin wallet that has some useful tools inside.
 
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/Grantrocks/bitcoingadgets)
 ![GitHub all releases](https://img.shields.io/github/downloads/Grantrocks/bitcoingadgets/total)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/Grantrocks/bitcoingadgets)
 ![GitHub issues](https://img.shields.io/github/issues-raw/Grantrocks/bitcoingadgets)
