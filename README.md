@@ -1,6 +1,10 @@
 ## Bitcoin Gadgets
 
 This is a very secure and simple bitcoin wallet that has some useful tools inside.
+
+![GitHub all releases](https://img.shields.io/github/downloads/Grantrocks/bitcoingadgets/total)
+![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/Grantrocks/bitcoingadgets)
+![GitHub issues](https://img.shields.io/github/issues-raw/Grantrocks/bitcoingadgets)
 ![GitHub contributors](https://img.shields.io/github/contributors/Grantrocks/bitcoingadgets)
 ## Installing
 
