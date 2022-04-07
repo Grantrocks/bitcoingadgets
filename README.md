@@ -1,8 +1,7 @@
 ## Bitcoin Gadgets
 
 This is a very secure and simple bitcoin wallet that has some useful tools inside.
-![GitHub contributors (via allcontributors.org)](https://img.shields.io/github/all-contributors/Grantrocks/bitcoingadgets/master)
-
+![GitHub contributors](https://img.shields.io/github/contributors/Grantrocks/bitcoingadgets)
 ## Installing
 
 To install this wallet you need to download the source code or by git. You then need to navigate to the downloaded folder in your terminal and run the following command
